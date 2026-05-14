@@ -26,9 +26,6 @@ void setup() {
   SPI.begin();
   rfid.PCD_Init();
   WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-  }
 }
 
 void loop() {
