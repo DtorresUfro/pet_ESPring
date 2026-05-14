@@ -2,12 +2,13 @@
 
 #define DT 4
 #define SCK 5
-
 #define PUMP_PIN 8
 
 HX711 scale;
 
-float pesoObjetivo = 150.0;
+float pesoInicial = 0;
+float pesoActual = 0;
+float objetivoML = 120.0;
 
 void setup() {
   Serial.begin(9600);
@@ -20,26 +21,28 @@ void setup() {
 
 void loop() {
   if (Serial.available()) {
-    String comando =
-      Serial.readStringUntil('\n');
-    comando.trim();
-    if (comando == "FILL") {
-      llenarAgua();
+    String mensaje = Serial.readStringUntil('\n');
+    int separador = mensaje.indexOf(',');
+    String uid = mensaje.substring(0, separador);
+    int agua = mensaje.substring(separador + 1).toInt();
+    //Verificar tanque
+    if (agua == 1) {
+      pesoInicial = scale.get_units(5);
+      digitalWrite(PUMP_PIN, HIGH);
+      while (true) {
+        pesoActual = scale.get_units(5);
+        float diferencia = pesoActual - pesoInicial;
+        //Aproxime: 1 gramo ≈ 1 ml
+        if (diferencia >= objetivoML) {
+          digitalWrite(PUMP_PIN, LOW);
+          Serial.println((int)diferencia);
+          break;
+        }
+        delay(100);
+      }
     }
-  }
-}
-
-void llenarAgua() {
-  digitalWrite(PUMP_PIN, HIGH);
-  while (true) {
-    float peso = scale.get_units(5);
-    Serial.print("Peso: ");
-    Serial.println(peso);
-    if (peso >= pesoObjetivo) {
-      digitalWrite(PUMP_PIN, LOW);
-      Serial.println("DONE");
-      break;
+    else {
+      Serial.println(0);
     }
-    delay(200);
   }
 }
