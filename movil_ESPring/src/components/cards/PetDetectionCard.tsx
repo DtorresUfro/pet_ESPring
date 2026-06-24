@@ -9,7 +9,7 @@ export default function PetDetectionCard({ detected }: Props) {
     <View style={styles.card}>
       <Text style={styles.title}>Detección de Mascota</Text>
       <Text style={styles.value}>
-        {detected ? "DETECTADA 🐶" : "SIN DETECCIÓN"}
+        {detected ? "DETECTADA" : "SIN DETECCIÓN"}
       </Text>
     </View>
   );
