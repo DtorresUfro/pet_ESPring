@@ -1,29 +1,38 @@
-import { useEffect } from "react";
-import { Text } from "react-native";
+import { useEffect, useState } from "react";
+import { ScrollView } from "react-native";
 import AppLayout from "../components/layout/AppLayout";
+
+import WaterLevelCard from "../components/cards/WaterLevelCard";
+import PumpStatusCard from "../components/cards/PumpStatusCard";
+import PetDetectionCard from "../components/cards/PetDetectionCard";
+import ConsumptionCard from "../components/cards/ConsumptionCard";
+
 import { ThingsBoardService } from "../services/thingsboard";
 
 export default function BasicDashboardScreen() {
 
-    useEffect(() => {
+  const [data, setData] = useState<any>(null);
 
-        const loadData = async () => {
+  useEffect(() => {
+    const load = async () => {
+      const service = new ThingsBoardService();
+      const telemetry = await service.getTelemetry();
+      setData(telemetry);
+    };
 
-            const service = new ThingsBoardService();
+    load();
+  }, []);
 
-            const telemetry = await service.getTelemetry();
+  if (!data) return null;
 
-            console.log(telemetry);
-
-        };
-
-        loadData();
-
-    }, []);
-
-    return (
-        <AppLayout>
-            <Text>Dashboard Básico</Text>
-        </AppLayout>
-    );
+  return (
+    <AppLayout>
+      <ScrollView>
+        <WaterLevelCard value={data.waterLevel} />
+        <PumpStatusCard isOn={data.pumpStatus} />
+        <PetDetectionCard detected={data.petDetected} />
+        <ConsumptionCard value={data.consumption} />
+      </ScrollView>
+    </AppLayout>
+  );
 }
